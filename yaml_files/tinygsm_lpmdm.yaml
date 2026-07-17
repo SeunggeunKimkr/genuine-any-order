@@ -1,0 +1,95 @@
+model:
+  tie_embeddings: true
+  planner:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 10
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 528
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "continuous" # "discrete"
+    input_projection: false
+    return_last_hidden_states: true
+    causal: false       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+  encoder:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 2
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 32
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "discrete" # "discrete"
+    return_last_hidden_states: true
+    segment_pooling: "eos_mean"
+    tie_lm_head: false # we tie the weights as QWen2 vocab size ~ 150k
+    causal: false       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+  decoder:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 2
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 33
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "discrete"
+    input_projection: false
+    return_last_hidden_states: false
+    tie_lm_head: true # we tie the weights as QWen2 vocab size ~ 150k
+    causal: true       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+
+training:
+  strategy: "lpmdm"
+  eos_id: 151643
+  data_ratio: 1.0
+  learning_rate: 3e-4
+  weight_decay: 0.01
+  num_epochs: 20
+  max_grad_norm: 1.0
+  batch_size: 64
+  gradient_accumulation_steps: 1
+  decoder_chunk_size: 1024
+  warmup_steps: 1000
+  logging_steps: 100
+  eval_steps: 5000
+  save_steps: 20000
+  ema: 0.9999 # same as MDLM (0.9999). Leave empty to disable EMA
+
+validation:
+  val_dir: "none" # gsm8k eval loop is self-included
+  sampling:
+    temperature: 0.0
+    slot_temperature: 0.0
+    eos_id: 151643
+    max_seg_num: 16
+    max_seg_len: 32
+    candidate_chunk_size: 1024
+    confidence: ["avg_log_prob"]
+    pass_at_k: [1]
+
+data:
+  mask_id: 151644
+  dataset: "tinygsm_split_v2"
+  data_dir: "data/tiny_gsm_split_v2"
+  val_ratio: 0.02
+  seed: 2026
+  training:
+    per_gpu_batch_size: ${training.batch_size}
+    cpus: 4
+
+wandb:
+  wandb: true
+  project: "tinygsm_gsm8k"
+  name: "lpmdm_eosmean_tielm_tinygsm_split_v2_bs64_1_4_ema9999e-4_lr3e-4-local"
+  entity: "seunggeun_kim_kr-austin"
+  # name: "eval_lpmdmv2_tielm_tinygsm_split_v2_step=160k_noema"

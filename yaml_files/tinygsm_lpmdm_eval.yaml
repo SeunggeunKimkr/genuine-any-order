@@ -1,0 +1,105 @@
+model:
+  tie_embeddings: true
+  planner:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 10
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 528
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "continuous" # "discrete"
+    input_projection: false
+    return_last_hidden_states: true
+    apply_final_norm: false   # if false, final_norm is Identity (skip RMSNorm before lm_head)
+    causal: false       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+  encoder:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 2
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 32
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "discrete" # "discrete"
+    return_last_hidden_states: true
+    apply_final_norm: false   # if false, final_norm is Identity (skip RMSNorm before lm_head)
+
+    segment_pooling: "eos_mean" # "mean" or "eos_mean"
+    tie_lm_head: false # we tie the weights as QWen2 vocab size ~ 150k
+    causal: false       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+  decoder:
+    vocab_size: 151645
+    hidden_size: 512
+    intermediate_size: 1536
+    num_layers: 2
+    num_attention_heads: 8
+    num_kv_heads: 8
+    max_position: 33
+    rms_norm_eps: 1e-6
+    dropout: 0.0
+    input_type: "discrete"
+    input_projection: false
+    return_last_hidden_states: false
+    apply_final_norm: false  # if false, final_norm is Identity (skip RMSNorm before lm_head)
+    tie_lm_head: true # we tie the weights as QWen2 vocab size ~ 150k
+    causal: true       # ARM pretraining uses causal attention
+    arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+
+training:
+  strategy: "lpmdm"
+  eos_id: 151643
+  data_ratio: 1.0
+  learning_rate: 3e-4
+  weight_decay: 0.01
+  num_epochs: 20
+  max_grad_norm: 1.0
+  batch_size: 64
+  gradient_accumulation_steps: 1
+  decoder_chunk_size: 1024
+  warmup_steps: 1000
+  logging_steps: 100
+  eval_steps: 5000
+  save_steps: 20000
+  ema: 0.9999 # same as MDLM (0.9999). Leave empty to disable EMA
+
+validation:
+  val_dir: "none" # gsm8k eval loop is self-included
+  limit: 128
+  trace_path: "eval_traces/lpmdm_eval_trace_minlp_all.txt"
+  log_path: "eval_traces/lpmdm_eval_passed_indices.jsonl"
+  compute_flops: true  # report avg per-problem total inference FLOPs (hardware-agnostic)
+  sampling:
+    track: false
+    temperature: 0.0
+    slot_temperature: 0.0
+    eos_id: 151643
+    max_seg_num: 16
+    max_seg_len: 32
+    candidate_chunk_size: 2048
+    confidence: ["avg_log_prob"] # "random", "l2r", "avg_log_prob", "min_log_prob"
+    pass_at_k: [1]
+    unmasking_num: [1]
+
+data:
+  mask_id: 151644
+  dataset: "tinygsm_split_v2"
+  data_dir: "/scratch/10816/sk58348/vista/tinygsm_lpmdm/data/tiny_gsm_split_v2"
+  val_ratio: 0.02
+  seed: 2026
+  training:
+    per_gpu_batch_size: ${training.batch_size}
+    cpus: 4
+
+wandb:
+  wandb: false
+  project: "tinygsm_gsm8k"
+  name: "eval_lpmdm_eos_mean_tielm_tinygsm_split_v2_ema9999e-4_temp0_slottemp0"
+  entity: "seunggeun_kim_kr-austin"
+  # name: "lpmdmv2_tielm_tinygsm_split_v2_bs64_1_4_ema9999e-4_lr3e-4-local"

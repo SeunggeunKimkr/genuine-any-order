@@ -1,0 +1,55 @@
+model:
+  vocab_size: 151645
+  hidden_size: 512
+  intermediate_size: 1536
+  num_layers: 14
+  num_attention_heads: 8
+  num_kv_heads: 8
+  max_position: 512
+  rms_norm_eps: 1e-6
+  dropout: 0.0
+  tie_lm_head: true # we tie the weights as QWen2 vocab size ~ 150k
+  causal: false      # if true, uses causal attention mask
+  arm_init: "none" # initialize MDM from ARM. Set to "none" to disable
+  input_type: "discrete" # "discrete"
+  return_last_hidden_states: false
+
+training:
+  strategy: "standard"
+  eos_id: 151643
+  data_ratio: 1.0
+  learning_rate: 3e-4
+  weight_decay: 0.01
+  num_epochs: 20
+  max_grad_norm: 1.0
+  batch_size: 64
+  warmup_steps: 1000
+  logging_steps: 100
+  eval_steps: 5000
+  save_steps: 20000
+  ema: 0.9999 # same as MDLM. Leave empty to disable EMA
+
+validation:
+  val_dir: "none" # gsm8k eval loop is self-included
+  sampling:
+    temperature: 0.0
+    confidence: ["top_k"]
+    unmasking_num: [1]
+    generate_until: false
+    eos_id: 151643
+  
+data:
+  mask_id: 151644
+  dataset: "tinygsm"
+  data_dir: "data/tiny_gsm"
+  val_ratio: 0.02
+  seed: 2026
+  training:
+    per_gpu_batch_size: ${training.batch_size}
+    cpus: 4
+
+wandb:
+  wandb: true
+  project: "tinygsm_gsm8k"
+  name: "mdm_baseline_bs64_4_lr3e-4-local"
+  entity: "seunggeun_kim_kr-austin"
