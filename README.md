@@ -38,6 +38,18 @@ and for reproducing the paper's tables).
 `FlexMDM/` is licensed under Apache-2.0 (see [`FlexMDM/LICENSE`](FlexMDM/LICENSE)
 and [`FlexMDM/NOTICE`](FlexMDM/NOTICE)).
 
+## Citation
+
+```bibtex
+@article{kim2026interface,
+  title   = {From Interface to Inference: Eliciting Any-Order Inference from Any-Order Models},
+  author  = {Kim, Seunggeun and Kim, Jaeyeon and Lee, Taekyun and Chen, Yuyuan
+             and Du, Yilun and Kakade, Sham and Chen, Sitan},
+  journal = {arXiv preprint},
+  year    = {2026}
+}
+```
+
 ## Acknowledgments
 
 This codebase builds on [PUMA](https://github.com/JaeyeonKim01/PUMA) and [FlexMDM](https://github.com/brianlck/FlexMDM).
