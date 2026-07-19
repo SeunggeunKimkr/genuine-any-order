@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flexmdm"
+version = "0.1.0"
+description = "FlexMDM: insertion + unmasking discrete diffusion fine-tuning of Dream-Coder-7B for Python code."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+# Runtime dependencies are listed in requirements.txt (install PyTorch
+# separately with a CUDA build for your system). Install this package in
+# editable mode so `flexmdm` and `evals` are importable and Hydra can find
+# flexmdm/config:
+#   pip install -e .
+
+[tool.setuptools]
+packages = ["flexmdm", "evals", "evals.humaneval_compare", "evals.tree_analysis"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+flexmdm = ["config/*.yaml"]

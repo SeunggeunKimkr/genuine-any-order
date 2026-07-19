@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local config (copied from paths.env.template)
+paths.env
+
+# Model / data artifacts (never committed — see docs/DATA.md, MODEL_CARD.md)
+*.pt
+*.bin
+*.safetensors
+*.npy
+checkpoints/
+flexmdm_tokenized/
+pretokenized/
+
+# Run outputs
+wandb/
+outputs/
+eval_runs/
+*.out
+*.err
+slurm-*.out
+
+# OS
+.DS_Store
+
+# Local working notes (not for the public repo)
+TODO.txt
