@@ -1,0 +1,56 @@
+FlexMDM: Any-Order Code Generation from Dream-Coder
+Copyright (c) 2026 Seunggeun Kim, Jaeyeon Kim, Taekyun Lee, Yuyuan Chen,
+Yilun Du, Sham Kakade, and Sitan Chen.
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+================================================================================
+Derived and included work
+================================================================================
+
+Dream-Coder
+-----------
+This repository derives from Dream-Coder (Xie et al., 2025, arXiv:2509.01142),
+which is licensed under the Apache License, Version 2.0.
+
+  - The base model fine-tuned here is `Dream-org/Dream-Coder-v0-Base-7B`.
+  - `evals/humaneval_compare/_sanitize_utils.py` is vendored from Dream-Coder's
+    evaluation code (its `lm_eval` HumanEval code sanitizer) and remains under
+    Apache-2.0.
+  - The pass@k and any-order eval pipeline under `evals/` follows Dream-Coder's
+    code-extraction and grading conventions.
+
+FlexMDM method
+--------------
+The training objective, schedules, and sampler implement the FlexMDM method of
+Kim et al., 2025a, "Any-order flexible length masked diffusion" (arXiv:2509.01025).
+
+================================================================================
+Training datasets
+================================================================================
+
+The released checkpoint was trained on the following Hugging Face datasets, each
+under its own license. Users must review and accept each source's terms before
+downloading or using the data. See docs/DATA.md for details.
+
+  - microsoft/rStar-Coder              — CC BY 4.0
+  - OpenCoder-LLM/opc-sft-stage2       — MIT
+  - KodCode/KodCode-V1-SFT-4o          — CC BY-NC 4.0  (NON-COMMERCIAL use only)
+  - nvidia/OpenCodeInstruct            — CC BY 4.0
+
+IMPORTANT: KodCode-V1-SFT-4o is licensed CC BY-NC 4.0 and may only be used for
+non-commercial purposes. Because of this restriction, this repository releases
+the tokenization scripts and the data manifest, but NOT the tokenized data
+arrays. See docs/DATA.md for how to reconstruct the tokenized dataset locally.
+
+================================================================================
+Evaluation benchmarks
+================================================================================
+
+Evaluation uses the HumanEval / HumanEval+ / MBPP / MBPP+ benchmarks (via the
+EvalPlus project). They are loaded from Hugging Face at evaluation time and are
+NOT redistributed with this repository:
+
+  - HumanEval (openai/human-eval)   — MIT
+  - MBPP                            — CC BY 4.0 (data) / Apache-2.0 (code)
+  - EvalPlus (HumanEval+ / MBPP+)   — Apache-2.0

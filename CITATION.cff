@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this code or the released checkpoints, please cite the paper."
+title: "From Interface to Inference: Eliciting Any-Order Inference from Any-Order Models (code: FlexMDM and LatentMDM)"
+authors:
+  - family-names: Kim
+    given-names: Seunggeun
+  - family-names: Kim
+    given-names: Jaeyeon
+  - family-names: Lee
+    given-names: Taekyun
+  - family-names: Chen
+    given-names: Yuyuan
+  - family-names: Du
+    given-names: Yilun
+  - family-names: Kakade
+    given-names: Sham
+  - family-names: Chen
+    given-names: Sitan
+preferred-citation:
+  type: article
+  title: "From Interface to Inference: Eliciting Any-Order Inference from Any-Order Models"
+  authors:
+    - family-names: Kim
+      given-names: Seunggeun
+    - family-names: Kim
+      given-names: Jaeyeon
+    - family-names: Lee
+      given-names: Taekyun
+    - family-names: Chen
+      given-names: Yuyuan
+    - family-names: Du
+      given-names: Yilun
+    - family-names: Kakade
+      given-names: Sham
+    - family-names: Chen
+      given-names: Sitan
+  journal: "arXiv preprint"
+  year: 2026

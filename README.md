@@ -23,6 +23,20 @@ Sitan Chen<sup>2</sup>
 
 > MDMs promise any-order generation but often collapse to left-to-right decoding. We introduce **LatentMDM** and **FlexMDM** that enable genuinely any-order inference.
 
+## Repository structure
+
+| Directory | Contents |
+|---|---|
+| [`FlexMDM/`](FlexMDM/) | FlexMDM fine-tuned from Dream-Coder-7B-Base for any-order Python code generation: training, data pipeline, inference, and the full evaluation suite (pass@k + any-order metrics). Self-contained, with its own docs and environment. |
+| [`LatentMDM/`](LatentMDM/) | LatentMDM (LP-MDM) training, sampling, and evaluation on TinyGSM. |
+
+**Released checkpoint:** the FlexMDM model is on the Hugging Face Hub at
+[`yuyuanchen0/flexmdm`](https://huggingface.co/yuyuanchen0/flexmdm)
+(inference weights; see [`FlexMDM/README.md`](FlexMDM/README.md) for loading
+and for reproducing the paper's tables).
+
+`FlexMDM/` is licensed under Apache-2.0 (see [`FlexMDM/LICENSE`](FlexMDM/LICENSE)
+and [`FlexMDM/NOTICE`](FlexMDM/NOTICE)).
 
 ## Acknowledgments
 

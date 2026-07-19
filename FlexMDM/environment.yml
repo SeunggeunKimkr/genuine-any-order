@@ -1,0 +1,25 @@
+# Conda environment for FlexMDM training + evaluation.
+#
+#   conda env create -f environment.yml
+#   conda activate flexmdm
+#   pip install -r requirements.txt
+#   pip install -e .          # make `flexmdm` and `evals` importable
+#
+# Adjust `pytorch-cuda` to your driver/toolkit. The released checkpoint was
+# trained with PyTorch 2.5.1 / CUDA 12.4.
+name: flexmdm
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch=2.5.1
+  - pytorch-cuda=12.4
+  - numpy=2.2.6
+  - pyyaml=6.0.3
+  - packaging
+  - tqdm
+  - safetensors
+  - sentencepiece
+  - pip

@@ -1,0 +1,127 @@
+# =============================================================================
+# FlexMDM fine-tuning config — the submission recipe.
+#
+# This is the exact recipe that produced the released checkpoint
+# (`global_step_49500`) reported in the paper:
+#   - power-family schedules with a = b = 1.7
+#     (insertion exponent 1.7, unmasking exponent a*b = 2.89)
+#   - full fine-tune of Dream-Coder-7B-Base
+#   - global batch 576, 16x H100, ~3 days
+#
+# Paths are read from the environment (see paths.env.template at the repo
+# root and scripts/train_16gpu.sh). Any `${oc.env:VAR,default}` resolves VAR
+# from the environment, falling back to `default` if unset.
+# =============================================================================
+
+data:
+  # The mix that trained the released checkpoint (the "pretokenized" mix).
+  # NOTE: this includes rStar-Coder and KodCode-V1-SFT-4o. See docs/DATA.md.
+  dataset_names:
+    - rstarcoder-seed-sft
+    - rstarcoder-synthetic-sft
+    - opc-sft-stage2-educational
+    - KodCode-V1-SFT-4o
+    - OpenCodeInstruct-score1-py-all
+  # Root where `python -m flexmdm.data tokenize` writes the raw HF corpora
+  # (only used by the tokenizer pass, not by training).
+  scratch_root: ${oc.env:SCRATCH_ROOT,/path/to/flexmdm_tokenized}
+  separator_kind: internal_pad
+  prepend_bos: true
+  # Root of the pre-tokenized .bin shards consumed by the training dataloader.
+  pretokenized_root: ${oc.env:PRETOKENIZED_ROOT,/path/to/pretokenized}
+  # Integer up-sampling of each source in the training mixture.
+  dataloader_repeat_factors:
+    OpenCodeInstruct-score1-py-all: 1
+    rstarcoder-synthetic-sft: 2
+    KodCode-V1-SFT-4o: 2
+    opc-sft-stage2-educational: 2
+    rstarcoder-seed-sft: 2
+  validation_pretokenized_root: null
+  validation_dataset_names: null
+  validation_fraction: 0.0005
+  validation_seed: null
+  validation_num_t_strata: 64
+  train_batch_size: 576
+  train_batch_size_is_global: true
+  validation_batch_size: 256
+  micro_batch_size_per_gpu: 6
+  validation_micro_batch_size_per_gpu: 16
+  max_length: 768
+  num_workers: 4
+  pin_memory: true
+  drop_last: true
+  persistent_workers: true
+
+model:
+  partial_pretrain: ${oc.env:BASE_MODEL,Dream-org/Dream-Coder-v0-Base-7B}
+  trust_remote_code: true
+  external_lib: null
+  torch_dtype: bfloat16
+  attn_implementation: flash_attention_2
+  attention_dropout: 0.0
+  enable_gradient_checkpointing: false
+  train_type: full_finetune
+  lora_rank: 0
+
+fsdp:
+  auto_wrap: true
+  min_num_params: 100000000
+  # full_shard: shard across all ranks (1 replica). hybrid_shard: shard within
+  # each node, replicate across nodes (keeps param all-gathers on NVLink).
+  sharding_strategy: hybrid_shard
+  cpu_offload: false
+  offload_params: false
+  sync_module_states: true
+  use_orig_params: true
+  mixed_precision:
+    enabled: true
+    param_dtype: bfloat16
+    reduce_dtype: float32
+    buffer_dtype: float32
+
+optim:
+  # Peak LR: 1e-5 for the backbone, 2e-5 for the insertion head
+  # (insertion_lr_multiplier applies on top of `lr`).
+  lr: 1e-5
+  insertion_lr_multiplier: 2.0
+  betas: [0.9, 0.95]
+  weight_decay: 0.01
+  warmup_steps_ratio: 0.1
+  clip_grad: 1.0
+
+trainer:
+  default_local_dir: ${oc.env:SAVE_ROOT,./checkpoints}
+  # Set (CLI: trainer.resume_from=<dir>) to resume from a checkpoint dir:
+  # backbone via from_pretrained(<dir>), FlexMDM extras via flexmdm_extras.pt,
+  # optimizer via optimizer_state.pt (if present), global_step + LR scheduler
+  # via training_state.pt.
+  resume_from: null
+  project_name: ${oc.env:WANDB_PROJECT,flexmdm}
+  experiment_name: flexmdm
+  total_epochs: 40
+  # The LR cosine schedule uses this horizon. The run was configured for 75000
+  # steps; the released/evaluated checkpoint is global_step_49500 (the paper
+  # rounds this to "~50000 steps"). Checkpoints are saved every 1500 steps.
+  total_training_steps: 75000
+  save_checkpoint_steps: 1500
+  validation_steps: 1500
+  logger: ['console', 'wandb']
+  wandb:
+    entity: ${oc.env:WANDB_ENTITY,your-wandb-entity}
+    mode: ${oc.env:WANDB_MODE,online}
+    dir: ${oc.env:WANDB_DIR,./wandb}
+  seed: 1
+
+flexmdm:
+  # Schedule choices: "linear", "quadratic", or "power".
+  # "power" uses alpha_t = 1 - (1-t)^exponent. Under the family
+  # alpha_t = 1 - (1-t)^a for insertion and beta_t = 1 - (1-t)^(a*b)
+  # for unmasking, set schedule to "power" on both heads and configure
+  # schedule_a / schedule_b (or the raw insertion_exponent /
+  # unmasking_exponent fields, which override a/b when present).
+  insertion_schedule: power
+  unmasking_schedule: power
+  schedule_a: 1.7
+  schedule_b: 1.7
+  insertion_exponent: null
+  unmasking_exponent: null
